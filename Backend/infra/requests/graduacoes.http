@@ -1,0 +1,14 @@
+### Listar graduações
+GET http://localhost:3333/api/graduacoes
+
+### Criar graduação
+POST http://localhost:3333/api/graduacoes
+Content-Type: application/json
+x-access-token: {{token}}
+
+{
+  "alunoId": "1",
+  "nivelAtual": "Branca",
+  "dataGraduacao": "2026-01-01",
+  "examinador": "Mestre"
+}

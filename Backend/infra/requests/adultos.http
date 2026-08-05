@@ -1,0 +1,16 @@
+### Listar adultos
+GET http://localhost:3333/api/adultos
+
+### Criar adulto
+POST http://localhost:3333/api/adultos
+Content-Type: application/json
+
+{
+  "nome": "Fulano",
+  "cpf": "12345678901",
+  "dataNascimento": "1990-01-01",
+  "email": "fulano@example.com",
+  "telefone": "(11)99999-9999",
+  "endereco": "Rua A, 123",
+  "graduacaoAtual": "Branca"
+}

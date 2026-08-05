@@ -1,0 +1,16 @@
+### Listar pagamentos
+GET http://localhost:3333/api/pagamentos
+
+### Criar pagamento
+POST http://localhost:3333/api/pagamentos
+Content-Type: application/json
+x-access-token: {{token}}
+
+{
+  "alunoId": "1",
+  "alunoNome": "Fulano",
+  "valor": 150.00,
+  "dataVencimento": "2026-08-10",
+  "mes": "Agosto",
+  "ano": 2026
+}

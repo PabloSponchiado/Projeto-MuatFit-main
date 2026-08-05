@@ -1,0 +1,18 @@
+### Listar kids
+GET http://localhost:3333/api/kids
+
+### Criar kid
+POST http://localhost:3333/api/kids
+Content-Type: application/json
+
+{
+  "nome": "Ciclano",
+  "cpf": "10987654321",
+  "dataNascimento": "2015-05-05",
+  "email": "ciclano@example.com",
+  "telefone": "(11)98888-8888",
+  "endereco": "Rua B, 456",
+  "graduacaoAtual": "Laranja",
+  "responsavel": "Maria",
+  "telefoneResponsavel": "(11)97777-7777"
+}
