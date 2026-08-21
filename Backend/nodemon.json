@@ -1,5 +1,6 @@
 {
-  "watch": ["src"],
+  "watch": [ "src" ],
   "ext": "ts",
-  "exec": "ts-node ./src/server.ts"
+  "ignore": [],
+  "exec": "node --loader ts-node/esm ./src/app.ts"
 }

@@ -1,14 +1,20 @@
-import { Router } from 'express'
-import AlunoController from './controller/AlunoController.ts'
-import AdultoController from './controller/AdultoController.ts'
-import KidsController from './controller/KidsController.ts'
-import GraduacaoController from './controller/GraduacaoController.ts'
-import PagamentoController from './controller/PagamentoController.ts'
-import AuthController from './controller/AuthController.ts'
-import auth from './middleware/Auth.ts'
+import { Router, type Request, type Response } from "express";
+import { Auth } from "./middleware/Auth.js";
+import AlunoController from './controller/AlunoController.js'
+import AdultoController from './controller/AdultoController.js'
+import KidsController from './controller/KidsController.js'
+import GraduacaoController from './controller/GraduacaoController.js'
+import PagamentoController from './controller/PagamentoController.js'
+import AuthController from './controller/AuthController.js'
+import auth from './middleware/Auth.js'
 
-const router = Router()
+const router = Router();
 
+// ==================== HEALTH CHECK ====================
+
+router.get('/', (req: Request, res: Response) => {
+    res.status(200).json({ mensagem: "Aplicação online.", timestamp: new Date() });
+});
 // Auth
 router.post('/api/login', AuthController.login)
 
@@ -41,4 +47,4 @@ router.get('/api/alunos/:id/pagamentos', auth, PagamentoController.listByAluno)
 // generic alunos endpoint used in some frontend requests
 router.get('/api/alunos', AlunoController.index)
 
-export default router
+export { router };

@@ -1,7 +1,6 @@
 import type { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
-import { DatabaseModel } from '../model/DatabaseModel.ts'
-import { JWT_SECRET } from '../config/env.ts'
+import { DatabaseModel } from '../model/DatabaseModel.js'
 
 const pool = new DatabaseModel().pool
 
@@ -16,7 +15,7 @@ const AuthController = {
     // para esqueleto, aceitamos senha em texto (trocar por hash em produção)
     if (usuario.senha !== senha) return res.status(401).json({ error: 'Invalid credentials' })
 
-    const token = jwt.sign({ id: usuario.id, email: usuario.email, role: usuario.role }, JWT_SECRET, { expiresIn: '8h' })
+    const token = jwt.sign({ id: usuario.id, email: usuario.email, role: usuario.role }, 'muayfit2026', { expiresIn: '8h' })
     return res.json({ id: usuario.id, nome: usuario.nome, email: usuario.email, role: usuario.role, academia: usuario.academia, token })
   }
 }

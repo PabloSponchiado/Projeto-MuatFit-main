@@ -1,10 +1,10 @@
 // imports
 import jwt from 'jsonwebtoken';
 import { type Request, type Response, type NextFunction } from 'express';
-import { DatabaseModel } from '../model/DatabaseModel.ts';
+import { DatabaseModel } from '../model/DatabaseModel.js';
 
 // palavra secreta
-const SECRET = 'AcervoDigital@2026';
+const SECRET = 'muayfit2026';
 // pool de conexão ao banco de dados
 const database = new DatabaseModel().pool;
 

@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express'
-import { DatabaseModel } from '../model/DatabaseModel.ts'
+import { DatabaseModel } from '../model/DatabaseModel.js'
 const pool = new DatabaseModel().pool
 
 const AdultoController = {
