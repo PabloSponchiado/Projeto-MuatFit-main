@@ -65,5 +65,7 @@ CREATE TABLE IF NOT EXISTS pagamentos (
 
 -- Seeds mínimos
 INSERT INTO usuario (nome, email, senha, role, academia)
-VALUES ('Admin', 'admin@example.com', 'changeme', 'ADMIN', 'Minha Academia')
+VALUES 
+  ('Admin', 'admin@example.com', 'changeme', 'ADMIN', 'Minha Academia'),
+  ('Admin', 'admin@muayfit.com', '123456', 'ADMIN', 'Minha Academia')
 ON CONFLICT (email) DO NOTHING;

@@ -17,6 +17,7 @@ router.get('/', (req: Request, res: Response) => {
 });
 // Auth
 router.post('/api/login', AuthController.login)
+router.post('/api/register', AuthController.register)
 
 // Alunos (frontend usa endpoints separados para adultos e kids)
 router.get('/api/adultos', AdultoController.index)
