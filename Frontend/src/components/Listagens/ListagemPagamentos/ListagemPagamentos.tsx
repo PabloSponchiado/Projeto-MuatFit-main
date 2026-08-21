@@ -44,6 +44,7 @@ export default function ListagemPagamentos(): JSX.Element {
   const totalPago = pagamentos.filter(p => p.status === 'PAGO').reduce((acc, p) => acc + p.valor, 0);
   const totalPendente = pagamentos.filter(p => p.status === 'PENDENTE').length;
   const totalVencido = pagamentos.filter(p => p.status === 'VENCIDO').length;
+  const totalPagos = pagamentos.filter(p => p.status === 'PAGO').length;
 
   return (
     <div className="p-6">
@@ -62,11 +63,12 @@ export default function ListagemPagamentos(): JSX.Element {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Recebido (mês)',   value: formatarMoeda(totalPago),       status: 'TODOS' as const,    color: 'text-green-400' },
-          { label: 'Pendentes',        value: String(totalPendente),          status: 'PENDENTE' as const, color: 'text-yellow-400' },
-          { label: 'Vencidos',         value: String(totalVencido),           status: 'VENCIDO' as const,  color: 'text-red-400' },
+          { label: 'Lucro recebido', value: formatarMoeda(totalPago), status: 'TODOS' as const, color: 'text-green-400' },
+          { label: 'Pendentes', value: String(totalPendente), status: 'PENDENTE' as const, color: 'text-yellow-400' },
+          { label: 'Vencidos', value: String(totalVencido), status: 'VENCIDO' as const, color: 'text-red-400' },
+          { label: 'Pagos', value: String(totalPagos), status: 'PAGO' as const, color: 'text-emerald-400' },
         ].map(({ label, value, status, color }) => (
           <button key={label} onClick={() => setFiltroStatus(filtroStatus === status ? 'TODOS' : status)}
             className={`p-4 rounded-xl border text-left transition-all ${filtroStatus === status ? 'bg-primary/10 border-primary/30' : 'bg-card border-border hover:border-border/80'}`}

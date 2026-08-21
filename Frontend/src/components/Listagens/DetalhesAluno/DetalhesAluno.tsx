@@ -97,7 +97,7 @@ export default function DetalhesAluno(): JSX.Element {
         <div className="flex gap-4 mt-4 pt-4 border-t border-border">
           <div>
             <p className="text-muted-foreground" style={{ fontSize: '0.75rem' }}>MATRÍCULA</p>
-            <p className="text-foreground font-medium" style={{ fontSize: '0.9rem' }}>{formatarData(aluno.dataMatricula)}</p>
+            <p className="text-foreground font-medium" style={{ fontSize: '0.9rem' }}>{aluno.id ? `#${String(aluno.id).padStart(4, '0')}` : '—'}</p>
           </div>
         </div>
 
