@@ -9,11 +9,25 @@ const GraduacaoController = {
   },
   async create(req: Request, res: Response) {
     const { alunoId, alunoNome, nivelAnterior, nivelAtual, dataGraduacao, observacao, examinador } = req.body
+
     const result = await pool.query(
       `INSERT INTO graduacoes (aluno_id, aluno_nome, nivel_anterior, nivel_atual, data_graduacao, observacao, examinador)
        VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [alunoId, alunoNome, nivelAnterior, nivelAtual, dataGraduacao, observacao, examinador]
+      [alunoId, alunoNome ?? '', nivelAnterior ?? null, nivelAtual, dataGraduacao, observacao ?? '', examinador]
     )
+
+    const alunoAtualizadoAdulto = await pool.query(
+      `UPDATE adultos SET graduacao_atual = $1 WHERE id = $2 RETURNING *`,
+      [nivelAtual, alunoId]
+    )
+
+    if (alunoAtualizadoAdulto.rowCount === 0) {
+      await pool.query(
+        `UPDATE kids SET graduacao_atual = $1 WHERE id = $2 RETURNING *`,
+        [nivelAtual, alunoId]
+      )
+    }
+
     return res.status(201).json(result.rows[0])
   },
   async show(req: Request, res: Response) {
