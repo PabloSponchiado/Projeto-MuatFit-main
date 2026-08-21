@@ -1,15 +1,23 @@
 import { type JSX, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import type { AlunoCreateDTO, CategoriaAluno, GraduacaoNivel } from '../../../dto/AlunoDTO';
+import type { CategoriaAluno, GraduacaoNivel } from '../../../dto/AlunoDTO';
 import AlunoRequests from '../../../fetch/AlunoRequests';
 import { GRADUACAO_ORDEM_ADULTO, GRADUACAO_ORDEM_KIDS } from '../../../utils/Utilitario';
 
 const getGraduacoesPorCategoria = (categoria: CategoriaAluno) =>
   categoria === 'KIDS' ? GRADUACAO_ORDEM_KIDS : GRADUACAO_ORDEM_ADULTO;
 
-type FormAlunoState = AlunoCreateDTO & {
+type FormAlunoState = {
+  nome: string;
+  cpf: string;
+  dataNascimento: string;
   categoria: CategoriaAluno;
+  email: string;
+  telefone: string;
+  endereco: string;
+  graduacaoAtual: string;
+  observacoes: string;
   responsavel?: string;
   telefoneResponsavel?: string;
 };
@@ -20,7 +28,7 @@ export default function FormAluno(): JSX.Element {
   const [erro, setErro] = useState('');
   const [dados, setDados] = useState<FormAlunoState>({
     nome: '', cpf: '', dataNascimento: '', categoria: 'ADULTO',
-    email: '', telefone: '', endereco: '', graduacaoAtual: 'Branca',
+    email: '', telefone: '', endereco: '', graduacaoAtual: getGraduacoesPorCategoria('ADULTO')[0], observacoes: '',
   });
 
   const set = (campo: keyof FormAlunoState, valor: string | number) =>
@@ -29,6 +37,12 @@ export default function FormAluno(): JSX.Element {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro('');
+
+    if (dados.categoria === 'KIDS' && (!dados.telefoneResponsavel || !dados.telefoneResponsavel.trim())) {
+      setErro('Para alunos da categoria Kids, o contato do responsável é obrigatório.');
+      return;
+    }
+
     setCarregando(true);
     try {
       await AlunoRequests.enviarFormularioAluno(dados);
@@ -82,7 +96,8 @@ export default function FormAluno(): JSX.Element {
                 value={dados.categoria}
                 onChange={e => {
                   const categoria = e.target.value as CategoriaAluno;
-                  setDados(prev => ({ ...prev, categoria, graduacaoAtual: getGraduacoesPorCategoria(categoria)[0] }));
+                  const proximaGraduacao = getGraduacoesPorCategoria(categoria)[0];
+                  setDados(prev => ({ ...prev, categoria, graduacaoAtual: proximaGraduacao }));
                 }}
                 required
               >
@@ -99,34 +114,36 @@ export default function FormAluno(): JSX.Element {
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-6 mb-4">
-          <h3 className="text-foreground mb-4 pb-3 border-b border-border">Contato</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Email *</label>
-              <input type="email" className={fieldClass} value={dados.email} onChange={e => set('email', e.target.value)} required placeholder="aluno@email.com" />
-            </div>
-            <div>
-              <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Telefone *</label>
-              <input className={fieldClass} value={dados.telefone} onChange={e => set('telefone', e.target.value)} required placeholder="(11) 99999-9999" />
-            </div>
-            <div className="md:col-span-2">
-              <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Endereço *</label>
-              <input className={fieldClass} value={dados.endereco} onChange={e => set('endereco', e.target.value)} required placeholder="Rua, número - Bairro, Cidade/UF" />
+        {dados.categoria !== 'KIDS' && (
+          <div className="bg-card border border-border rounded-xl p-6 mb-4">
+            <h3 className="text-foreground mb-4 pb-3 border-b border-border">Contato</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Email *</label>
+                <input type="email" className={fieldClass} value={dados.email} onChange={e => set('email', e.target.value)} required placeholder="aluno@email.com" />
+              </div>
+              <div>
+                <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Telefone *</label>
+                <input className={fieldClass} value={dados.telefone} onChange={e => set('telefone', e.target.value)} required placeholder="(11) 99999-9999" />
+              </div>
+              <div className="md:col-span-2">
+                <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Endereço *</label>
+                <input className={fieldClass} value={dados.endereco} onChange={e => set('endereco', e.target.value)} required placeholder="Rua, número - Bairro, Cidade/UF" />
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {dados.categoria === 'KIDS' && (
           <div className="bg-card border border-border rounded-xl p-6 mb-4">
             <h3 className="text-foreground mb-4 pb-3 border-b border-border">Responsável</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Nome do responsável *</label>
-                <input className={fieldClass} value={dados.responsavel ?? ''} onChange={e => set('responsavel', e.target.value)} required placeholder="Nome completo" />
+                <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Nome do responsável</label>
+                <input className={fieldClass} value={dados.responsavel ?? ''} onChange={e => set('responsavel', e.target.value)} placeholder="Nome completo (opcional)" />
               </div>
               <div>
-                <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Telefone do responsável *</label>
+                <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Contato do responsável *</label>
                 <input className={fieldClass} value={dados.telefoneResponsavel ?? ''} onChange={e => set('telefoneResponsavel', e.target.value)} required placeholder="(11) 99999-9999" />
               </div>
             </div>

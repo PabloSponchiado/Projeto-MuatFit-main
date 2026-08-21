@@ -12,11 +12,16 @@ import PDetalhesGraduacao from '../pages/PDetalhes/PDetalhesGraduacao/PDetalhesG
 import PCadastroAluno from '../pages/PCadastro/PCadastroAluno/PCadastroAluno';
 import PCadastroPagamento from '../pages/PCadastro/PCadastroPagamento/PCadastroPagamento';
 import PCadastroGraduacao from '../pages/PCadastro/PCadastroGraduacao/PCadastroGraduacao';
+import PRegister from '../pages/PRegister/PRegister';
 
 export const router = createBrowserRouter([
   {
     path: '/login',
     Component: PLogin,
+  },
+  {
+    path: '/register',
+    Component: PRegister,
   },
   {
     path: '/',
@@ -34,4 +39,8 @@ export const router = createBrowserRouter([
       { path: 'graduacoes/:id',     Component: PDetalhesGraduacao },
     ],
   },
-]);
+], {
+  future: {
+    v7_startTransition: true,
+  },
+});

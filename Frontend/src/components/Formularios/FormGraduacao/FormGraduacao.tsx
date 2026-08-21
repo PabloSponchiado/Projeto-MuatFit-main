@@ -18,6 +18,8 @@ export default function FormGraduacao(): JSX.Element {
   const hoje = new Date().toISOString().split('T')[0];
   const [dados, setDados] = useState({
     alunoId: '',
+    alunoNome: '',
+    nivelAnterior: '' as GraduacaoNivel | '',
     nivelAtual: '' as GraduacaoNivel | '',
     dataGraduacao: hoje,
     examinador: 'Rafael Moraes',
@@ -34,7 +36,13 @@ export default function FormGraduacao(): JSX.Element {
     const ordem = aluno ? getGraduacoesPorCategoria(aluno.categoria) : [];
     const idxAtual = aluno ? ordem.indexOf(aluno.graduacaoAtual) : -1;
     const proximo = idxAtual < ordem.length - 1 ? ordem[idxAtual + 1] : (aluno?.graduacaoAtual ?? '');
-    setDados(prev => ({ ...prev, alunoId: id, nivelAtual: proximo as GraduacaoNivel }));
+    setDados(prev => ({
+      ...prev,
+      alunoId: id,
+      alunoNome: aluno?.nome ?? '',
+      nivelAnterior: aluno?.graduacaoAtual ?? '',
+      nivelAtual: proximo as GraduacaoNivel,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +51,15 @@ export default function FormGraduacao(): JSX.Element {
     setErro('');
     setCarregando(true);
     try {
-      await GraduacaoRequests.enviarFormularioGraduacao({ ...dados, nivelAtual: dados.nivelAtual as GraduacaoNivel });
+      await GraduacaoRequests.enviarFormularioGraduacao({
+        alunoId: dados.alunoId,
+        alunoNome: alunoSelecionado?.nome ?? dados.alunoNome,
+        nivelAnterior: alunoSelecionado?.graduacaoAtual ?? dados.nivelAnterior,
+        nivelAtual: dados.nivelAtual as GraduacaoNivel,
+        dataGraduacao: dados.dataGraduacao,
+        examinador: dados.examinador,
+        observacao: dados.observacao,
+      });
       navigate('/graduacoes');
     } catch (err) {
       setErro(err instanceof Error ? err.message : 'Erro ao registrar graduação');

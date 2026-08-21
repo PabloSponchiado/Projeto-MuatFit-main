@@ -9,11 +9,11 @@ export interface KidsBaseDTO {
   id: number;
   nome: string;
   cpf: string;
-  dataNascimento: Date;
+  dataNascimento: string | Date;
   email: string;
   telefone: string;
   endereco: string;
-  dataMatricula: Date;
+  dataMatricula: string | Date;
   ativo: boolean;
   graduacaoAtual: GraduacaoKidsNivel;
   responsavel: string;
@@ -27,7 +27,7 @@ export interface KidsDTO extends KidsBaseDTO {}
 export interface KidsCreateDTO {
   nome: string;
   cpf: string;
-  dataNascimento: Date;
+  dataNascimento: string | Date;
   email: string;
   telefone: string;
   endereco: string;

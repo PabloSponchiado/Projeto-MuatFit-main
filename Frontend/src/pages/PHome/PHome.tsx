@@ -27,7 +27,7 @@ export default function PHome(): JSX.Element {
   const totalKids = alunos.filter(a => a.categoria === 'KIDS').length;
   const pagosMes = pagamentos.filter(p => p.status === 'PAGO');
   const receitaMes = pagosMes.reduce((acc, p) => acc + p.valor, 0);
-  const pendentes = pagamentos.filter(p => p.status === 'PENDENTE' || p.status === 'VENCIDO');
+  const pendentes = pagamentos.filter(p => p.status !== 'PAGO');
   const vencidos = pagamentos.filter(p => p.status === 'VENCIDO');
 
   const stats = [

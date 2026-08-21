@@ -6,7 +6,7 @@ class AuthRequests {
     private endpointLogin;
 
     constructor() {
-        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3333';
+        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:1285';
         this.endpointLogin = '/api/login';
     }
 
@@ -21,30 +21,66 @@ class AuthRequests {
 
         if (!respostaAPI.ok) {
             const data = await respostaAPI.json().catch(() => ({}));
-            throw new Error(data.message ?? 'Falha ao efetuar login');
+            throw new Error(data.message ?? data.error ?? 'Falha ao efetuar login');
         }
 
-        const usuario: UsuarioDTO = await respostaAPI.json();
+        const usuario: UsuarioDTO & { token?: string } = await respostaAPI.json();
         if (!usuario || typeof usuario !== 'object') {
             throw new Error('Resposta inválida do servidor ao efetuar login.');
         }
 
         localStorage.setItem('usuario', JSON.stringify(usuario));
+        if (usuario.token) {
+            localStorage.setItem('token', usuario.token);
+        }
+        console.info(`${respostaAPI.status}: ${respostaAPI.statusText}`);
+        return true;
+    }
+
+    async register(dados: { nome: string; email: string; senha: string; academia?: string }): Promise<boolean> {
+        const respostaAPI = await fetch(`${this.serverURL}/api/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dados)
+        });
+
+        if (!respostaAPI.ok) {
+            const data = await respostaAPI.json().catch(() => ({}));
+            throw new Error(data.message ?? data.error ?? 'Falha ao criar conta');
+        }
+
+        const usuario: UsuarioDTO & { token?: string } = await respostaAPI.json();
+        if (!usuario || typeof usuario !== 'object') {
+            throw new Error('Resposta inválida do servidor ao criar conta.');
+        }
+
+        localStorage.setItem('usuario', JSON.stringify(usuario));
+        if (usuario.token) {
+            localStorage.setItem('token', usuario.token);
+        }
         console.info(`${respostaAPI.status}: ${respostaAPI.statusText}`);
         return true;
     }
 
     logout(): void {
         localStorage.removeItem('usuario');
+        localStorage.removeItem('token');
     }
 
     isAutenticado(): boolean {
-        return localStorage.getItem('usuario') !== null;
+        return Boolean(localStorage.getItem('usuario') || localStorage.getItem('token'));
     }
 
     getUsuarioLogado(): UsuarioDTO | null {
         const usuario = localStorage.getItem('usuario');
         return usuario ? JSON.parse(usuario) as UsuarioDTO : null;
+    }
+
+    getToken(): string {
+        const usuario = JSON.parse(localStorage.getItem('usuario') ?? 'null');
+        return localStorage.getItem('token') ?? usuario?.token ?? '';
     }
 }
 

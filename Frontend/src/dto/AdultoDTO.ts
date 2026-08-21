@@ -16,11 +16,11 @@ export interface AdultoBaseDTO {
   id: number;
   nome: string;
   cpf: string;
-  dataNascimento: Date;
+  dataNascimento: string | Date;
   email: string;
   telefone: string;
   endereco: string;
-  dataMatricula: Date;
+  dataMatricula: string | Date;
   ativo: boolean;
   graduacaoAtual: GraduacaoAdultoNivel;
   observacoes?: string;
@@ -32,7 +32,7 @@ export interface AdultoDTO extends AdultoBaseDTO {}
 export interface AdultoCreateDTO {
   nome: string;
   cpf: string;
-  dataNascimento: Date;
+  dataNascimento: string | Date;
   email: string;
   telefone: string;
   endereco: string;

@@ -13,8 +13,27 @@ class GraduacaoRequests {
     }
 
     private getToken(): string {
-        const usuario = JSON.parse(localStorage.getItem('usuario') ?? '{}');
-        return usuario?.token ?? '';
+        const usuario = JSON.parse(localStorage.getItem('usuario') ?? 'null');
+        return localStorage.getItem('token') ?? usuario?.token ?? '';
+    }
+
+    private normalizarGraduacao(grad: any): GraduacaoDTO {
+        return {
+            id: String(grad.id ?? ''),
+            alunoId: String(grad.alunoId ?? grad.aluno_id ?? ''),
+            alunoNome: grad.alunoNome ?? grad.aluno_nome ?? '',
+            nivelAnterior: grad.nivelAnterior ?? grad.nivel_anterior ?? null,
+            nivelAtual: grad.nivelAtual ?? grad.nivel_atual ?? '',
+            dataGraduacao: grad.dataGraduacao ?? grad.data_graduacao ?? '',
+            observacao: grad.observacao ?? '',
+            examinador: grad.examinador ?? ''
+        };
+    }
+
+    private normalizarListaGraduacoes(data: any): GraduacaoDTO[] {
+        if (Array.isArray(data)) return data.map(item => this.normalizarGraduacao(item));
+        if (data && Array.isArray(data.value)) return data.value.map((item: any) => this.normalizarGraduacao(item));
+        return [];
     }
 
     async obterListaDeGraduacoes() {
@@ -24,7 +43,8 @@ class GraduacaoRequests {
             const respostaAPI = await fetch(`${this.serverURL}${this.endpointGraduacao}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'x-access-token': token
                 }
             });
 
@@ -32,14 +52,14 @@ class GraduacaoRequests {
                 if (respostaAPI.status === 204) {
                     return [];
                 }
-                return await respostaAPI.json();
+                const data = await respostaAPI.json();
+                return this.normalizarListaGraduacoes(data);
             } else {
                 throw new Error(`Não foi possível listar as graduações.`);
             }
         } catch (error) {
             console.error(`Erro ao fazer a consulta de graduações. ${error}`);
             return [];
-            return;
         }
     }
 
@@ -82,7 +102,7 @@ class GraduacaoRequests {
 
             if (respostaAPI.ok) {
                 const graduacao = await respostaAPI.json();
-                return graduacao;
+                return this.normalizarGraduacao(graduacao);
             } else {
                 throw new Error("Não foi possível buscar a graduação.");
             }
@@ -105,7 +125,7 @@ class GraduacaoRequests {
 
             if (respostaAPI.ok) {
                 const graduacoes = await respostaAPI.json();
-                return graduacoes;
+                return this.normalizarListaGraduacoes(graduacoes);
             } else {
                 throw new Error(`Não foi possível buscar as graduações do aluno.`);
             }
