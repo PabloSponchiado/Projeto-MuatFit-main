@@ -20,15 +20,15 @@ router.post('/api/login', AuthController.login)
 router.post('/api/register', AuthController.register)
 
 // Alunos (frontend usa endpoints separados para adultos e kids)
-router.get('/api/adultos', AdultoController.index)
-router.get('/api/adultos/:id', AdultoController.show)
-router.post('/api/adultos', AdultoController.create)
-router.delete('/api/adultos/:id', AdultoController.delete)
+router.get('/api/adultos', auth, AdultoController.index)
+router.get('/api/adultos/:id', auth, AdultoController.show)
+router.post('/api/adultos', auth, AdultoController.create)
+router.delete('/api/adultos/:id', auth, AdultoController.delete)
 
-router.get('/api/kids', KidsController.index)
-router.get('/api/kids/:id', KidsController.show)
-router.post('/api/kids', KidsController.create)
-router.delete('/api/kids/:id', KidsController.delete)
+router.get('/api/kids', auth, KidsController.index)
+router.get('/api/kids/:id', auth, KidsController.show)
+router.post('/api/kids', auth, KidsController.create)
+router.delete('/api/kids/:id', auth, KidsController.delete)
 
 // Graduacoes
 router.get('/api/graduacoes', auth, GraduacaoController.index)
@@ -46,6 +46,6 @@ router.delete('/api/pagamentos/:id', auth, PagamentoController.delete)
 router.get('/api/alunos/:id/pagamentos', auth, PagamentoController.listByAluno)
 
 // generic alunos endpoint used in some frontend requests
-router.get('/api/alunos', AlunoController.index)
+router.get('/api/alunos', auth, AlunoController.index)
 
 export { router };
