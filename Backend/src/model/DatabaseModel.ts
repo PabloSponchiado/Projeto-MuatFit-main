@@ -12,6 +12,106 @@ export class DatabaseModel {
    */
   private _config: object;
 
+  private async runMigration() {
+    const migrationSql = `
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'adultos' AND column_name = 'usuario_id'
+        ) THEN
+          ALTER TABLE adultos ADD COLUMN usuario_id INTEGER;
+        END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'kids' AND column_name = 'usuario_id'
+        ) THEN
+          ALTER TABLE kids ADD COLUMN usuario_id INTEGER;
+        END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'graduacoes' AND column_name = 'usuario_id'
+        ) THEN
+          ALTER TABLE graduacoes ADD COLUMN usuario_id INTEGER;
+        END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'pagamentos' AND column_name = 'usuario_id'
+        ) THEN
+          ALTER TABLE pagamentos ADD COLUMN usuario_id INTEGER;
+        END IF;
+      END $$;
+
+      DO $$
+      DECLARE total_usuarios INTEGER;
+      BEGIN
+        SELECT COUNT(*)::int INTO total_usuarios FROM usuario;
+
+        IF total_usuarios = 1 THEN
+          UPDATE adultos
+          SET usuario_id = (SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1)
+          WHERE usuario_id IS NULL;
+
+          UPDATE kids
+          SET usuario_id = (SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1)
+          WHERE usuario_id IS NULL;
+
+          UPDATE graduacoes
+          SET usuario_id = (SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1)
+          WHERE usuario_id IS NULL;
+
+          UPDATE pagamentos
+          SET usuario_id = (SELECT id_usuario FROM usuario ORDER BY id_usuario LIMIT 1)
+          WHERE usuario_id IS NULL;
+        END IF;
+      END $$;
+
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'adultos_usuario_fk'
+        ) THEN
+          ALTER TABLE adultos
+            ADD CONSTRAINT adultos_usuario_fk
+            FOREIGN KEY (usuario_id) REFERENCES usuario(id_usuario) ON DELETE CASCADE;
+        END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'kids_usuario_fk'
+        ) THEN
+          ALTER TABLE kids
+            ADD CONSTRAINT kids_usuario_fk
+            FOREIGN KEY (usuario_id) REFERENCES usuario(id_usuario) ON DELETE CASCADE;
+        END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'graduacoes_usuario_fk'
+        ) THEN
+          ALTER TABLE graduacoes
+            ADD CONSTRAINT graduacoes_usuario_fk
+            FOREIGN KEY (usuario_id) REFERENCES usuario(id_usuario) ON DELETE CASCADE;
+        END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint
+          WHERE conname = 'pagamentos_usuario_fk'
+        ) THEN
+          ALTER TABLE pagamentos
+            ADD CONSTRAINT pagamentos_usuario_fk
+            FOREIGN KEY (usuario_id) REFERENCES usuario(id_usuario) ON DELETE CASCADE;
+        END IF;
+      END $$;
+    `;
+
+    await this._pool.query(migrationSql);
+  }
+
   /**
    * Pool de conexões com o banco de dados
    */
@@ -54,6 +154,7 @@ export class DatabaseModel {
       // Tenta conectar ao banco de dados
       await this._client.connect();
       console.log("Database connected!");
+      await this.runMigration();
       // Encerra a conexão
       this._client.end();
       return true;
@@ -65,6 +166,10 @@ export class DatabaseModel {
       this._client.end();
       return false;
     }
+  }
+
+  public async ensureSchema() {
+    await this.runMigration();
   }
 
   public get pool() {

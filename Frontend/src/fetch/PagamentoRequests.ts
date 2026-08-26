@@ -7,7 +7,7 @@ class PagamentoRequests {
     private endpointAluno;
 
     constructor() {
-        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3333';
+        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:1285';
         this.endpointPagamento = '/api/pagamentos';
         this.endpointAluno = '/api/alunos';
     }

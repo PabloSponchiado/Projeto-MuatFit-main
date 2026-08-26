@@ -3,7 +3,9 @@ import { DatabaseModel } from "./model/DatabaseModel.js";
 
 const port = 1285;
 
-new DatabaseModel()
+const database = new DatabaseModel();
+
+database
   .testeConexao()
   .then((resbd) => {
     if (resbd) {

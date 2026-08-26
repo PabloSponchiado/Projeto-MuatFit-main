@@ -8,7 +8,7 @@ class AlunoRequests {
     private serverURL;
 
     constructor() {
-        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3333';
+        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:1285';
     }
 
     private getToken(): string {
