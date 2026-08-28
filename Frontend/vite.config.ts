@@ -1,17 +1,22 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import path from 'path'
+import { fileURLToPath } from 'url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
 
-function figmaAssetResolver() {
+// `__dirname` is not available in ESM; compute it from `import.meta.url`.
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+function figmaAssetResolver(): Plugin {
   return {
     name: 'figma-asset-resolver',
-    resolveId(id) {
+    resolveId(id: string) {
       if (id.startsWith('figma:asset/')) {
         const filename = id.replace('figma:asset/', '')
-        return path.resolve(__dirname, 'src/assets', filename)
+        return path.resolve(__dirname, 'src', 'assets', filename)
       }
+      return null
     },
   }
 }
