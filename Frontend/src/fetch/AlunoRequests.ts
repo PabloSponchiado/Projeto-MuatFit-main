@@ -1,14 +1,15 @@
 import type { AdultoCreateDTO, AdultoDTO } from '../dto/AdultoDTO';
 import type { KidsCreateDTO, KidsDTO } from '../dto/KidsDTO';
+import { appConfig } from '@/appConfig';
 
 type AlunoDTO = AdultoDTO | KidsDTO;
 type AlunoCreateDTO = AdultoCreateDTO | KidsCreateDTO;
 
 class AlunoRequests {
-    private serverURL;
+    private serverURL = '';
 
     constructor() {
-        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3333';
+        this.serverURL = appConfig.render_url;
     }
 
     private getToken(): string {

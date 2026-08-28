@@ -11,8 +11,8 @@ export default function FormLogin({ initialMode = 'login' }: FormLoginProps): JS
   const navigate = useNavigate();
   const [modoCadastro, setModoCadastro] = useState(initialMode === 'register');
   const [nome, setNome] = useState('');
-  const [email, setEmail] = useState('admin@example.com');
-  const [senha, setSenha] = useState('changeme');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
   const [academia, setAcademia] = useState('Minha Academia');
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
@@ -163,13 +163,7 @@ export default function FormLogin({ initialMode = 'login' }: FormLoginProps): JS
                 Entrar
               </button>
             </p>
-          ) : (
-            <p className="mt-5 text-center text-muted-foreground" style={{ fontSize: '0.78rem' }}>
-              Login demo: <span className="text-foreground">admin@example.com</span> / <span className="text-foreground">changeme</span>
-              <br />
-              ou <span className="text-foreground">admin@muayfit.com</span> / <span className="text-foreground">123456</span>
-            </p>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

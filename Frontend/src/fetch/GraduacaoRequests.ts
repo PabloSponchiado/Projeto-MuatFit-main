@@ -1,4 +1,5 @@
 import type { GraduacaoCreateDTO, GraduacaoDTO } from '../dto/GraduacaoDTO';
+import { appConfig } from '@/appConfig';
 
 // Classe responsável por fazer requisições à API - graduação
 class GraduacaoRequests {
@@ -7,7 +8,7 @@ class GraduacaoRequests {
     private endpointAluno;
 
     constructor() {
-        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3333';
+        this.serverURL = appConfig.render_url;
         this.endpointGraduacao = '/api/graduacoes';
         this.endpointAluno = '/api/alunos';
     }
@@ -65,12 +66,13 @@ class GraduacaoRequests {
 
     async enviarFormularioGraduacao(formGraduacao: GraduacaoCreateDTO): Promise<boolean> {
         try {
-            const token = localStorage.getItem('token');
+            const token = this.getToken();
             const respostaAPI = await fetch(`${this.serverURL}${this.endpointGraduacao}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-access-token': `${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'x-access-token': token
                 },
                 body: JSON.stringify(formGraduacao)
             });
@@ -88,7 +90,7 @@ class GraduacaoRequests {
 
     async obterGraduacaoPorId(id_graduacao: string) {
         try {
-            const token = localStorage.getItem('token');
+            const token = this.getToken();
             if (!token) {
                 throw new Error("Token de autenticação não encontrado. Faça login novamente.");
             }
@@ -96,7 +98,8 @@ class GraduacaoRequests {
             const respostaAPI = await fetch(`${this.serverURL}${this.endpointGraduacao}/${id_graduacao}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-access-token': `${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'x-access-token': token
                 }
             });
 
@@ -114,12 +117,13 @@ class GraduacaoRequests {
 
     async obterGraduacoesPorAluno(id_aluno: string) {
         try {
-            const token = localStorage.getItem('token');
+            const token = this.getToken();
 
             const respostaAPI = await fetch(`${this.serverURL}${this.endpointAluno}/${id_aluno}/graduacoes`, {
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-access-token': `${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'x-access-token': token
                 }
             });
 
@@ -137,12 +141,13 @@ class GraduacaoRequests {
 
     async excluirGraduacao(id_graduacao: string): Promise<boolean> {
         try {
-            const token = localStorage.getItem('token');
+            const token = this.getToken();
             const respostaAPI = await fetch(`${this.serverURL}${this.endpointGraduacao}/${id_graduacao}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
-                    'x-access-token': `${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'x-access-token': token
                 }
             });
 

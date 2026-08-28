@@ -1,4 +1,5 @@
 import type { PagamentoCreateDTO, PagamentoDTO } from '../dto/PagamentoDTO';
+import { appConfig } from '@/appConfig';
 
 // Classe responsável por fazer requisições à API - pagamento
 class PagamentoRequests {
@@ -7,7 +8,7 @@ class PagamentoRequests {
     private endpointAluno;
 
     constructor() {
-        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:3333';
+        this.serverURL = appConfig.render_url;
         this.endpointPagamento = '/api/pagamentos';
         this.endpointAluno = '/api/alunos';
     }
