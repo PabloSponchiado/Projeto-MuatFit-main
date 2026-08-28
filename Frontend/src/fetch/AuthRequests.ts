@@ -1,4 +1,5 @@
 import type { LoginDTO, UsuarioDTO } from '../dto/UsuarioDTO';
+import { appConfig } from '@/appConfig';
 
 // Classe responsável por fazer requisições à API - autenticação
 class AuthRequests {
@@ -6,7 +7,7 @@ class AuthRequests {
     private endpointLogin;
 
     constructor() {
-        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:1285';
+        this.serverURL = appConfig.render_url;
         this.endpointLogin = '/api/login';
     }
 

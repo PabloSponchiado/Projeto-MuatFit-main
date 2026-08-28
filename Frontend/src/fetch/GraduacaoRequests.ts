@@ -1,4 +1,5 @@
 import type { GraduacaoCreateDTO, GraduacaoDTO } from '../dto/GraduacaoDTO';
+import { appConfig } from '@/appConfig';
 
 // Classe responsável por fazer requisições à API - graduação
 class GraduacaoRequests {
@@ -7,7 +8,7 @@ class GraduacaoRequests {
     private endpointAluno;
 
     constructor() {
-        this.serverURL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:1285';
+        this.serverURL = appConfig.render_url;
         this.endpointGraduacao = '/api/graduacoes';
         this.endpointAluno = '/api/alunos';
     }
