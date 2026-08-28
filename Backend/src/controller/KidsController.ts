@@ -22,16 +22,21 @@ const KidsController = {
     return res.json(result.rows[0])
   },
   async create(req: Request, res: Response) {
-    const usuarioId = requireUsuarioId(req, res)
-    if (!usuarioId) return
+    try {
+      const usuarioId = requireUsuarioId(req, res)
+      if (!usuarioId) return
 
-    const { nome, cpf, dataNascimento, email, telefone, endereco, graduacaoAtual, responsavel, telefoneResponsavel, observacoes } = req.body
-    const result = await pool.query(
-      `INSERT INTO kids (nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, responsavel, telefone_responsavel, observacoes, usuario_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
-      [nome, cpf, dataNascimento, email, telefone, endereco, graduacaoAtual, responsavel, telefoneResponsavel, observacoes, usuarioId]
-    )
-    return res.status(201).json(result.rows[0])
+      const { nome, cpf, dataNascimento, email, telefone, endereco, graduacaoAtual, responsavel, telefoneResponsavel, observacoes } = req.body
+      const result = await pool.query(
+        `INSERT INTO kids (nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, responsavel, telefone_responsavel, observacoes, usuario_id)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+        [nome, cpf, dataNascimento, email, telefone, endereco, graduacaoAtual, responsavel, telefoneResponsavel, observacoes, usuarioId]
+      )
+      return res.status(201).json(result.rows[0])
+    } catch (error: any) {
+      console.error('KidsController.create error:', error)
+      return res.status(500).json({ error: 'Erro interno ao criar kid', message: error?.message ?? String(error) })
+    }
   },
   async delete(req: Request, res: Response) {
     const usuarioId = requireUsuarioId(req, res)

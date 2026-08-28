@@ -54,13 +54,37 @@ const AlunoController = {
   },
 
   async create(req: Request, res: Response) {
-    const usuarioId = requireUsuarioId(req, res)
-    if (!usuarioId) return
+    try {
+      const usuarioId = requireUsuarioId(req, res)
+      if (!usuarioId) return
 
-    const categoria = String(req.body?.categoria ?? 'ADULTO').toUpperCase()
-    const payload = req.body ?? {}
+      const categoria = String(req.body?.categoria ?? 'ADULTO').toUpperCase()
+      const payload = req.body ?? {}
 
-    if (categoria === 'KIDS') {
+      if (categoria === 'KIDS') {
+        const dados = {
+          nome: payload.nome,
+          cpf: payload.cpf,
+          dataNascimento: payload.dataNascimento,
+          email: payload.email ?? '',
+          telefone: payload.telefone ?? '',
+          endereco: payload.endereco ?? '',
+          graduacaoAtual: payload.graduacaoAtual ?? 'Branca',
+          responsavel: payload.responsavel ?? '',
+          telefoneResponsavel: payload.telefoneResponsavel ?? '',
+          observacoes: payload.observacoes ?? '',
+          usuario_id: usuarioId
+        }
+
+        const result = await pool.query(
+          `INSERT INTO kids (nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, responsavel, telefone_responsavel, observacoes, usuario_id)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+          [dados.nome, dados.cpf, dados.dataNascimento, dados.email, dados.telefone, dados.endereco, dados.graduacaoAtual, dados.responsavel, dados.telefoneResponsavel, dados.observacoes, dados.usuario_id]
+        )
+
+        return res.status(201).json(normalizarAluno(result.rows[0], 'KIDS'))
+      }
+
       const dados = {
         nome: payload.nome,
         cpf: payload.cpf,
@@ -69,40 +93,21 @@ const AlunoController = {
         telefone: payload.telefone ?? '',
         endereco: payload.endereco ?? '',
         graduacaoAtual: payload.graduacaoAtual ?? 'Branca',
-        responsavel: payload.responsavel ?? '',
-        telefoneResponsavel: payload.telefoneResponsavel ?? '',
         observacoes: payload.observacoes ?? '',
         usuario_id: usuarioId
       }
 
       const result = await pool.query(
-        `INSERT INTO kids (nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, responsavel, telefone_responsavel, observacoes, usuario_id)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
-        [dados.nome, dados.cpf, dados.dataNascimento, dados.email, dados.telefone, dados.endereco, dados.graduacaoAtual, dados.responsavel, dados.telefoneResponsavel, dados.observacoes, dados.usuario_id]
+        `INSERT INTO adultos (nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, observacoes, usuario_id)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+        [dados.nome, dados.cpf, dados.dataNascimento, dados.email, dados.telefone, dados.endereco, dados.graduacaoAtual, dados.observacoes, dados.usuario_id]
       )
 
-      return res.status(201).json(normalizarAluno(result.rows[0], 'KIDS'))
+      return res.status(201).json(normalizarAluno(result.rows[0], 'ADULTO'))
+    } catch (error: any) {
+      console.error('AlunoController.create error:', error)
+      return res.status(500).json({ error: 'Erro interno ao criar aluno', message: error?.message ?? String(error) })
     }
-
-    const dados = {
-      nome: payload.nome,
-      cpf: payload.cpf,
-      dataNascimento: payload.dataNascimento,
-      email: payload.email ?? '',
-      telefone: payload.telefone ?? '',
-      endereco: payload.endereco ?? '',
-      graduacaoAtual: payload.graduacaoAtual ?? 'Branca',
-      observacoes: payload.observacoes ?? '',
-      usuario_id: usuarioId
-    }
-
-    const result = await pool.query(
-      `INSERT INTO adultos (nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, observacoes, usuario_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-      [dados.nome, dados.cpf, dados.dataNascimento, dados.email, dados.telefone, dados.endereco, dados.graduacaoAtual, dados.observacoes, dados.usuario_id]
-    )
-
-    return res.status(201).json(normalizarAluno(result.rows[0], 'ADULTO'))
   }
 }
 
