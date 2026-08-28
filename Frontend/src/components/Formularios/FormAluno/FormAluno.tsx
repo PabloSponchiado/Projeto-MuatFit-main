@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import type { CategoriaAluno, GraduacaoNivel } from '../../../dto/AlunoDTO';
 import AlunoRequests from '../../../fetch/AlunoRequests';
-import { GRADUACAO_ORDEM_ADULTO, GRADUACAO_ORDEM_KIDS, validarCPF } from '../../../utils/Utilitario';
+import { GRADUACAO_ORDEM_ADULTO, GRADUACAO_ORDEM_KIDS, validarCPF, formatarCPF, formatarTelefone } from '../../../utils/Utilitario';
 
 const getGraduacoesPorCategoria = (categoria: CategoriaAluno) =>
   categoria === 'KIDS' ? GRADUACAO_ORDEM_KIDS : GRADUACAO_ORDEM_ADULTO;
@@ -33,6 +33,18 @@ export default function FormAluno(): JSX.Element {
 
   const set = (campo: keyof FormAlunoState, valor: string | number) =>
     setDados(prev => ({ ...prev, [campo]: valor }));
+
+  const onlyDigits = (s: string) => String(s ?? '').replace(/\D/g, '');
+
+  const handleCpfChange = (val: string) => {
+    const nums = onlyDigits(val).slice(0, 11);
+    set('cpf', formatarCPF(nums));
+  };
+
+  const handlePhoneChange = (campo: 'telefone' | 'telefoneResponsavel') => (val: string) => {
+    const nums = onlyDigits(val).slice(0, 11);
+    set(campo, formatarTelefone(nums));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +137,7 @@ export default function FormAluno(): JSX.Element {
             </div>
             <div>
               <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>CPF *</label>
-              <input className={fieldClass} value={dados.cpf} onChange={e => set('cpf', e.target.value)} required placeholder="000.000.000-00" />
+              <input className={fieldClass} value={dados.cpf} onChange={e => handleCpfChange(e.target.value)} required placeholder="000.000.000-00" />
             </div>
             <div>
               <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Data de Nascimento *</label>
@@ -166,7 +178,7 @@ export default function FormAluno(): JSX.Element {
               </div>
               <div>
                 <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Telefone *</label>
-                <input className={fieldClass} value={dados.telefone} onChange={e => set('telefone', e.target.value)} required placeholder="(11) 99999-9999" />
+                <input className={fieldClass} value={dados.telefone} onChange={e => handlePhoneChange('telefone')(e.target.value)} required placeholder="(11) 99999-9999" />
               </div>
               <div className="md:col-span-2">
                 <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Endereço *</label>
@@ -186,7 +198,7 @@ export default function FormAluno(): JSX.Element {
               </div>
               <div>
                 <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Contato do responsável *</label>
-                <input className={fieldClass} value={dados.telefoneResponsavel ?? ''} onChange={e => set('telefoneResponsavel', e.target.value)} required placeholder="(11) 99999-9999" />
+                <input className={fieldClass} value={dados.telefoneResponsavel ?? ''} onChange={e => handlePhoneChange('telefoneResponsavel')(e.target.value)} required placeholder="(11) 99999-9999" />
               </div>
             </div>
           </div>
