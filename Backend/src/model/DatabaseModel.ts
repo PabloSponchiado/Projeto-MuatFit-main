@@ -43,6 +43,13 @@ export class DatabaseModel {
         ) THEN
           ALTER TABLE pagamentos ADD COLUMN usuario_id INTEGER;
         END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'usuario' AND column_name = 'imagem_perfil'
+        ) THEN
+          ALTER TABLE usuario ADD COLUMN imagem_perfil TEXT;
+        END IF;
       END $$;
 
       DO $$

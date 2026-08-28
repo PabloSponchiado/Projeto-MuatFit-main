@@ -6,7 +6,8 @@ CREATE TABLE IF NOT EXISTS usuario (
   email TEXT NOT NULL UNIQUE,
   senha TEXT NOT NULL,
   role TEXT NOT NULL,
-  academia TEXT
+  academia TEXT,
+  imagem_perfil TEXT
 );
 
 CREATE TABLE IF NOT EXISTS adultos (
