@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import type { CategoriaAluno, GraduacaoNivel } from '../../../dto/AlunoDTO';
 import AlunoRequests from '../../../fetch/AlunoRequests';
-import { GRADUACAO_ORDEM_ADULTO, GRADUACAO_ORDEM_KIDS } from '../../../utils/Utilitario';
+import { GRADUACAO_ORDEM_ADULTO, GRADUACAO_ORDEM_KIDS, validarCPF } from '../../../utils/Utilitario';
 
 const getGraduacoesPorCategoria = (categoria: CategoriaAluno) =>
   categoria === 'KIDS' ? GRADUACAO_ORDEM_KIDS : GRADUACAO_ORDEM_ADULTO;
@@ -41,6 +41,48 @@ export default function FormAluno(): JSX.Element {
     if (dados.categoria === 'KIDS' && (!dados.telefoneResponsavel || !dados.telefoneResponsavel.trim())) {
       setErro('Para alunos da categoria Kids, o contato do responsável é obrigatório.');
       return;
+    }
+
+    // Validações do formulário
+    const nomeRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]{2,100}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const onlyDigits = (s: string) => String(s ?? '').replace(/\D/g, '');
+    const telefoneValido = (tel: string) => {
+      const d = onlyDigits(tel);
+      return /^\d{11}$/.test(d) && d.charAt(2) === '9';
+    };
+
+    if (!nomeRegex.test(String(dados.nome || ''))) {
+      setErro('Nome inválido. Informe nome completo (apenas letras, 2-100 caracteres).');
+      return;
+    }
+
+    if (!validarCPF(String(dados.cpf || ''))) {
+      setErro('CPF inválido. Informe um CPF com 11 dígitos.');
+      return;
+    }
+
+    if (!dados.dataNascimento) {
+      setErro('Data de nascimento é obrigatória.');
+      return;
+    }
+
+    if (dados.categoria !== 'KIDS') {
+      if (!emailRegex.test(String(dados.email || ''))) {
+        setErro('Email inválido.');
+        return;
+      }
+
+      if (!telefoneValido(String(dados.telefone || ''))) {
+        setErro('Telefone inválido. Use o formato: (DD) 9XXXX-XXXX ou apenas 11 dígitos.');
+        return;
+      }
+    } else {
+      // kids: validar telefone do responsável
+      if (!telefoneValido(String(dados.telefoneResponsavel || ''))) {
+        setErro('Telefone do responsável inválido. Use o formato: (DD) 9XXXX-XXXX ou apenas 11 dígitos.');
+        return;
+      }
     }
 
     setCarregando(true);
