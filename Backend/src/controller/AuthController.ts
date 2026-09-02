@@ -1,6 +1,9 @@
 import type { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import { DatabaseModel } from '../model/DatabaseModel.js'
+import fs from 'fs'
+import path from 'path'
+import { Usuario } from '../model/Usuario.js'
 
 const pool = new DatabaseModel().pool
 
@@ -12,16 +15,8 @@ const AuthController = {
     if (!email || !senha) return res.status(400).json({ error: 'email and senha required' })
 
     try {
-      const tables = ['usuario', 'usuarios']
-      let usuario: any = null
-
-      for (const table of tables) {
-        const result = await pool.query(`SELECT * FROM ${table} WHERE email = $1 LIMIT 1`, [email])
-        if (result.rowCount && result.rowCount > 0) {
-          usuario = result.rows[0]
-          break
-        }
-      }
+      const result = await pool.query('SELECT * FROM usuario WHERE email = $1 LIMIT 1', [email])
+      const usuario = result.rows[0]
 
       if (!usuario) return res.status(401).json({ error: 'Invalid credentials' })
 
@@ -41,6 +36,7 @@ const AuthController = {
         email: emailUsuario,
         role: roleUsuario,
         academia: academiaUsuario,
+        imagemPerfil: usuario.imagem_perfil ?? '',
         token
       })
     } catch (error) {
@@ -71,6 +67,13 @@ const AuthController = {
       )
 
       const usuario = result.rows[0]
+      if (req.file) {
+        const extensao = path.extname(req.file.originalname)
+        const nomeArquivo = `${usuario.id_usuario}${extensao}`
+        fs.renameSync(req.file.path, path.resolve(req.file.destination, nomeArquivo))
+        await pool.query('UPDATE usuario SET imagem_perfil = $1 WHERE id_usuario = $2', [nomeArquivo, usuario.id_usuario])
+        usuario.imagem_perfil = nomeArquivo
+      }
       const token = jwt.sign({ id: usuario.id_usuario, email: usuario.email, role: usuario.role }, 'muayfit2026', { expiresIn: '8h' })
 
       return res.status(201).json({
@@ -79,11 +82,34 @@ const AuthController = {
         email: usuario.email,
         role: usuario.role,
         academia: usuario.academia,
+        imagemPerfil: usuario.imagem_perfil ?? '',
         token
       })
     } catch (error) {
       console.error('Erro ao cadastrar usuário:', error)
       return res.status(500).json({ error: 'Erro interno ao cadastrar usuário' })
+    }
+  },
+
+  async updateProfile(req: Request, res: Response) {
+    const id = Number(req.headers.userId)
+    if (!id) return res.status(401).json({ error: 'Usuário não autenticado' })
+    try {
+      const nome = String(req.body?.nome ?? '').trim() || undefined
+      const email = String(req.body?.email ?? '').trim().toLowerCase() || undefined
+      const academia = String(req.body?.academia ?? '').trim() || undefined
+      const senha = String(req.body?.senha ?? '').trim()
+      let imagem: string | undefined
+      if (req.file) {
+        imagem = `${id}${path.extname(req.file.originalname)}`
+        fs.renameSync(req.file.path, path.resolve(req.file.destination, imagem))
+      }
+      const atualizado = await Usuario.atualizarPerfil(id, { nome, email, academia, senha, imagemPerfil: imagem })
+      if (!atualizado) return res.status(404).json({ error: 'Usuário não encontrado' })
+      return res.json({ ...atualizado, id: atualizado.id_usuario, imagemPerfil: atualizado.imagem_perfil ?? '' })
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error)
+      return res.status(500).json({ error: 'Erro interno ao atualizar perfil' })
     }
   }
 }

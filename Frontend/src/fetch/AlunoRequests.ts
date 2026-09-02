@@ -37,7 +37,8 @@ class AlunoRequests {
             categoria,
             responsavel: aluno.responsavel ?? '',
             telefoneResponsavel: aluno.telefoneResponsavel ?? aluno.telefone_responsavel ?? '',
-            observacoes: aluno.observacoes ?? ''
+            observacoes: aluno.observacoes ?? '',
+            imagemPerfil: aluno.imagemPerfil ?? aluno.imagem_perfil ?? ''
         };
     }
 
@@ -80,6 +81,7 @@ class AlunoRequests {
         telefoneResponsavel?: string;
         graduacaoAtual?: string;
         dataNascimento?: string | Date;
+        imagemPerfil?: File;
     }): Promise<boolean> {
         try {
             const categoria = String(formAluno.categoria ?? 'ADULTO') as 'ADULTO' | 'KIDS';
@@ -91,14 +93,18 @@ class AlunoRequests {
                 delete payload.telefoneResponsavel;
             }
             delete payload.categoria;
+            delete payload.imagemPerfil;
+
+            const formulario = new FormData();
+            Object.entries(payload).forEach(([campo, valor]) => {
+                if (valor !== undefined && valor !== null) formulario.append(campo, String(valor));
+            });
+            if (formAluno.imagemPerfil instanceof File) formulario.append('imagemPerfil', formAluno.imagemPerfil);
 
             const respostaAPI = await fetch(`${this.serverURL}${endpoint}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.getToken()}`
-                },
-                body: JSON.stringify(payload)
+                headers: { 'Authorization': `Bearer ${this.getToken()}` },
+                body: formulario
             });
 
             if (!respostaAPI.ok) throw new Error(`Erro ${respostaAPI.status}: ${respostaAPI.statusText}`);
@@ -167,6 +173,22 @@ class AlunoRequests {
             console.error(`Erro ao excluir aluno. ${error}`);
             return false;
         }
+    }
+
+    async atualizarAluno(id: string, dados: Record<string, unknown>, categoria: 'ADULTO' | 'KIDS', imagemPerfil?: File): Promise<AlunoDTO> {
+        const formulario = new FormData();
+        Object.entries(dados).forEach(([campo, valor]) => {
+            if (valor !== undefined && valor !== null) formulario.append(campo, String(valor));
+        });
+        if (imagemPerfil) formulario.append('imagemPerfil', imagemPerfil);
+        const resposta = await fetch(`${this.serverURL}${this.getEndpoint(categoria)}/${id}`, {
+            method: 'PATCH',
+            headers: { Authorization: `Bearer ${this.getToken()}` },
+            body: formulario
+        });
+        const data = await resposta.json().catch(() => ({}));
+        if (!resposta.ok) throw new Error(data.error ?? 'Falha ao atualizar aluno');
+        return this.normalizarAluno(data, categoria) as AlunoDTO;
     }
 }
 

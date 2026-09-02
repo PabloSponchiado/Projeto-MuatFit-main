@@ -19,6 +19,7 @@ export interface KidsBaseDTO {
   responsavel: string;
   telefoneResponsavel: string;
   observacoes: string;
+  imagemPerfil?: string;
   categoria: 'ADULTO' | 'KIDS';
 }
 
@@ -35,4 +36,5 @@ export interface KidsCreateDTO {
   responsavel: string;
   telefoneResponsavel: string;
   observacoes: string;
+  imagemPerfil?: string;
 }

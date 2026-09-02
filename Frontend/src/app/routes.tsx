@@ -13,6 +13,7 @@ import PCadastroAluno from '../pages/PCadastro/PCadastroAluno/PCadastroAluno';
 import PCadastroPagamento from '../pages/PCadastro/PCadastroPagamento/PCadastroPagamento';
 import PCadastroGraduacao from '../pages/PCadastro/PCadastroGraduacao/PCadastroGraduacao';
 import PRegister from '../pages/PRegister/PRegister';
+import PPerfil from '../pages/PPerfil/PPerfil';
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
     Component: ProtectedRoutes,
     children: [
       { index: true,                Component: PHome },
+      { path: 'perfil',             Component: PPerfil },
       { path: 'alunos',             Component: PListagemAluno },
       { path: 'alunos/novo',        Component: PCadastroAluno },
       { path: 'alunos/:id',         Component: PDetalhesAluno },

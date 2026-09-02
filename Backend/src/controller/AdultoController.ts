@@ -1,38 +1,30 @@
 import type { Request, Response } from 'express'
-import { DatabaseModel } from '../model/DatabaseModel.js'
 import { requireUsuarioId } from '../helpers/usuarioScope.js'
-
-const pool = new DatabaseModel().pool
+import Adulto from '../model/Adulto.js'
 
 const AdultoController = {
   async index(req: Request, res: Response) {
     const usuarioId = requireUsuarioId(req, res)
     if (!usuarioId) return
 
-    const result = await pool.query('SELECT * FROM adultos WHERE usuario_id = $1 ORDER BY id', [usuarioId])
-    return res.json(result.rows)
+    return res.json(await Adulto.listarAdultos(usuarioId))
   },
   async show(req: Request, res: Response) {
     const usuarioId = requireUsuarioId(req, res)
     if (!usuarioId) return
 
-    const { id } = req.params
-    const result = await pool.query('SELECT * FROM adultos WHERE id = $1 AND usuario_id = $2', [id, usuarioId])
-    if (result.rowCount === 0) return res.status(404).json({ error: 'Not found' })
-    return res.json(result.rows[0])
+    const id = req.params.id as string
+    const adulto = await Adulto.listarAdulto(id, usuarioId)
+    if (!adulto) return res.status(404).json({ error: 'Not found' })
+    return res.json(adulto)
   },
   async create(req: Request, res: Response) {
     try {
       const usuarioId = requireUsuarioId(req, res)
       if (!usuarioId) return
 
-      const { nome, cpf, dataNascimento, email, telefone, endereco, graduacaoAtual, observacoes } = req.body
-      const result = await pool.query(
-        `INSERT INTO adultos (nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, observacoes, usuario_id)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-        [nome, cpf, dataNascimento, email, telefone, endereco, graduacaoAtual, observacoes, usuarioId]
-      )
-      return res.status(201).json(result.rows[0])
+      const adulto = await Adulto.cadastrarAdulto({ ...req.body, imagemPerfil: req.file?.filename }, usuarioId)
+      return res.status(201).json(adulto)
     } catch (error: any) {
       console.error('AdultoController.create error:', error)
       return res.status(500).json({ error: 'Erro interno ao criar adulto', message: error?.message ?? String(error) })
@@ -42,10 +34,21 @@ const AdultoController = {
     const usuarioId = requireUsuarioId(req, res)
     if (!usuarioId) return
 
-    const { id } = req.params
-    const result = await pool.query('DELETE FROM adultos WHERE id = $1 AND usuario_id = $2 RETURNING *', [id, usuarioId])
-    if (result.rowCount === 0) return res.status(404).json({ error: 'Not found' })
+    const id = req.params.id as string
+    const removido = await Adulto.removerAdulto(id, usuarioId)
+    if (!removido) return res.status(404).json({ error: 'Not found' })
     return res.status(204).send()
+  },
+  async update(req: Request, res: Response) {
+    const usuarioId = requireUsuarioId(req, res)
+    if (!usuarioId) return
+    try {
+      const adulto = await Adulto.atualizarAdulto(req.params.id as string, req.body, usuarioId, req.file?.filename)
+      if (!adulto) return res.status(404).json({ error: 'Not found' })
+      return res.json(adulto)
+    } catch (error: any) {
+      return res.status(500).json({ error: 'Erro interno ao atualizar adulto', message: error?.message ?? String(error) })
+    }
   }
 }
 

@@ -2,6 +2,7 @@ import { type JSX } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, CreditCard, Award, LogOut, Dumbbell } from 'lucide-react';
 import AuthRequests from '../../fetch/AuthRequests';
+import { appConfig } from '../../appConfig';
 
 const navItems = [
   { to: '/',            label: 'Dashboard',   icon: LayoutDashboard, exact: true },
@@ -13,6 +14,7 @@ const navItems = [
 export default function Navegacao(): JSX.Element {
   const navigate = useNavigate();
   const usuario = AuthRequests.getUsuarioLogado();
+  const imagemPerfil = usuario?.imagemPerfil ? `${appConfig.uploads_url}/${usuario.imagemPerfil}` : '';
 
   const handleLogout = () => {
     AuthRequests.logout();
@@ -66,12 +68,11 @@ export default function Navegacao(): JSX.Element {
 
       {/* User info */}
       <div className="px-3 pb-4 border-t border-border pt-4">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted mb-2">
-          <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0">
-            <span className="text-primary font-bold" style={{ fontSize: '0.8rem' }}>
-              {usuario?.nome.charAt(0) ?? 'A'}
-            </span>
+          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted mb-2">
+          <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            {imagemPerfil ? <img src={imagemPerfil} alt="Foto do professor" className="w-full h-full object-cover" /> : <span className="text-primary font-bold" style={{ fontSize: '0.8rem' }}>{usuario?.nome.charAt(0) ?? 'A'}</span>}
           </div>
+        <button onClick={() => navigate('/perfil')} className="w-full text-left px-3 py-2 text-sm text-primary hover:bg-muted rounded-lg mb-2">Editar perfil</button>
           <div className="flex-1 min-w-0">
             <p className="text-foreground truncate" style={{ fontSize: '0.8rem', fontWeight: 600 }}>{usuario?.nome ?? 'Admin'}</p>
             <p className="text-muted-foreground truncate" style={{ fontSize: '0.7rem' }}>{usuario?.academia ?? 'Academia'}</p>

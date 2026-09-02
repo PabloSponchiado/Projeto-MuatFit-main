@@ -38,13 +38,17 @@ class AuthRequests {
         return true;
     }
 
-    async register(dados: { nome: string; email: string; senha: string; academia?: string }): Promise<boolean> {
+    async register(dados: { nome: string; email: string; senha: string; academia?: string; imagemPerfil?: File }): Promise<boolean> {
+        const formulario = new FormData();
+        formulario.append('nome', dados.nome);
+        formulario.append('email', dados.email);
+        formulario.append('senha', dados.senha);
+        formulario.append('academia', dados.academia ?? 'Minha Academia');
+        if (dados.imagemPerfil) formulario.append('imagemPerfil', dados.imagemPerfil);
+
         const respostaAPI = await fetch(`${this.serverURL}/api/register`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dados)
+            body: formulario
         });
 
         if (!respostaAPI.ok) {
@@ -63,6 +67,24 @@ class AuthRequests {
         }
         console.info(`${respostaAPI.status}: ${respostaAPI.statusText}`);
         return true;
+    }
+
+    async updateProfile(dados: { nome: string; email: string; academia: string; senha?: string; imagemPerfil?: File }): Promise<UsuarioDTO> {
+        const formulario = new FormData();
+        formulario.append('nome', dados.nome);
+        formulario.append('email', dados.email);
+        formulario.append('academia', dados.academia);
+        if (dados.senha) formulario.append('senha', dados.senha);
+        if (dados.imagemPerfil) formulario.append('imagemPerfil', dados.imagemPerfil);
+        const resposta = await fetch(`${this.serverURL}/api/usuarios/perfil`, {
+            method: 'PATCH',
+            headers: { Authorization: `Bearer ${this.getToken()}` },
+            body: formulario
+        });
+        const data = await resposta.json().catch(() => ({}));
+        if (!resposta.ok) throw new Error(data.error ?? 'Falha ao atualizar perfil');
+        localStorage.setItem('usuario', JSON.stringify(data));
+        return data as UsuarioDTO;
     }
 
     logout(): void {

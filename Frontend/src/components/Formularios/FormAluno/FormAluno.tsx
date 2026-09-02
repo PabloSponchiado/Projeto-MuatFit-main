@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import type { CategoriaAluno, GraduacaoNivel } from '../../../dto/AlunoDTO';
 import AlunoRequests from '../../../fetch/AlunoRequests';
-import { GRADUACAO_ORDEM_ADULTO, GRADUACAO_ORDEM_KIDS } from '../../../utils/Utilitario';
+import { GRADUACAO_ORDEM_ADULTO, GRADUACAO_ORDEM_KIDS, validarCPF, formatarCPF, formatarTelefone } from '../../../utils/Utilitario';
 
 const getGraduacoesPorCategoria = (categoria: CategoriaAluno) =>
   categoria === 'KIDS' ? GRADUACAO_ORDEM_KIDS : GRADUACAO_ORDEM_ADULTO;
@@ -20,12 +20,14 @@ type FormAlunoState = {
   observacoes: string;
   responsavel?: string;
   telefoneResponsavel?: string;
+  imagemPerfil?: File;
 };
 
 export default function FormAluno(): JSX.Element {
   const navigate = useNavigate();
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
+  const [imagemPerfil, setImagemPerfil] = useState<File | undefined>();
   const [dados, setDados] = useState<FormAlunoState>({
     nome: '', cpf: '', dataNascimento: '', categoria: 'ADULTO',
     email: '', telefone: '', endereco: '', graduacaoAtual: getGraduacoesPorCategoria('ADULTO')[0], observacoes: '',
@@ -33,6 +35,18 @@ export default function FormAluno(): JSX.Element {
 
   const set = (campo: keyof FormAlunoState, valor: string | number) =>
     setDados(prev => ({ ...prev, [campo]: valor }));
+
+  const onlyDigits = (s: string) => String(s ?? '').replace(/\D/g, '');
+
+  const handleCpfChange = (val: string) => {
+    const nums = onlyDigits(val).slice(0, 11);
+    set('cpf', formatarCPF(nums));
+  };
+
+  const handlePhoneChange = (campo: 'telefone' | 'telefoneResponsavel') => (val: string) => {
+    const nums = onlyDigits(val).slice(0, 11);
+    set(campo, formatarTelefone(nums));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,9 +57,51 @@ export default function FormAluno(): JSX.Element {
       return;
     }
 
+    // Validações do formulário
+    const nomeRegex = /^[A-Za-zÀ-ÖØ-öø-ÿ' -]{2,100}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const onlyDigits = (s: string) => String(s ?? '').replace(/\D/g, '');
+    const telefoneValido = (tel: string) => {
+      const d = onlyDigits(tel);
+      return /^\d{11}$/.test(d) && d.charAt(2) === '9';
+    };
+
+    if (!nomeRegex.test(String(dados.nome || ''))) {
+      setErro('Nome inválido. Informe nome completo (apenas letras, 2-100 caracteres).');
+      return;
+    }
+
+    if (!validarCPF(String(dados.cpf || ''))) {
+      setErro('CPF inválido. Informe um CPF com 11 dígitos.');
+      return;
+    }
+
+    if (!dados.dataNascimento) {
+      setErro('Data de nascimento é obrigatória.');
+      return;
+    }
+
+    if (dados.categoria !== 'KIDS') {
+      if (!emailRegex.test(String(dados.email || ''))) {
+        setErro('Email inválido.');
+        return;
+      }
+
+      if (!telefoneValido(String(dados.telefone || ''))) {
+        setErro('Telefone inválido. Use o formato: (DD) 9XXXX-XXXX ou apenas 11 dígitos.');
+        return;
+      }
+    } else {
+      // kids: validar telefone do responsável
+      if (!telefoneValido(String(dados.telefoneResponsavel || ''))) {
+        setErro('Telefone do responsável inválido. Use o formato: (DD) 9XXXX-XXXX ou apenas 11 dígitos.');
+        return;
+      }
+    }
+
     setCarregando(true);
     try {
-      await AlunoRequests.enviarFormularioAluno(dados);
+      await AlunoRequests.enviarFormularioAluno({ ...dados, imagemPerfil });
       navigate('/alunos');
     } catch (err) {
       setErro(err instanceof Error ? err.message : 'Erro ao cadastrar aluno');
@@ -83,7 +139,11 @@ export default function FormAluno(): JSX.Element {
             </div>
             <div>
               <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>CPF *</label>
-              <input className={fieldClass} value={dados.cpf} onChange={e => set('cpf', e.target.value)} required placeholder="000.000.000-00" />
+              <input className={fieldClass} value={dados.cpf} onChange={e => handleCpfChange(e.target.value)} required placeholder="000.000.000-00" />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Foto do aluno</label>
+              <input type="file" accept="image/*" onChange={e => setImagemPerfil(e.target.files?.[0])} className="w-full text-sm text-muted-foreground" />
             </div>
             <div>
               <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Data de Nascimento *</label>
@@ -124,7 +184,7 @@ export default function FormAluno(): JSX.Element {
               </div>
               <div>
                 <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Telefone *</label>
-                <input className={fieldClass} value={dados.telefone} onChange={e => set('telefone', e.target.value)} required placeholder="(11) 99999-9999" />
+                <input className={fieldClass} value={dados.telefone} onChange={e => handlePhoneChange('telefone')(e.target.value)} required placeholder="(11) 99999-9999" />
               </div>
               <div className="md:col-span-2">
                 <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Endereço *</label>
@@ -144,7 +204,7 @@ export default function FormAluno(): JSX.Element {
               </div>
               <div>
                 <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Contato do responsável *</label>
-                <input className={fieldClass} value={dados.telefoneResponsavel ?? ''} onChange={e => set('telefoneResponsavel', e.target.value)} required placeholder="(11) 99999-9999" />
+                <input className={fieldClass} value={dados.telefoneResponsavel ?? ''} onChange={e => handlePhoneChange('telefoneResponsavel')(e.target.value)} required placeholder="(11) 99999-9999" />
               </div>
             </div>
           </div>
