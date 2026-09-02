@@ -55,5 +55,6 @@ router.get('/api/alunos/:id/pagamentos', auth, PagamentoController.listByAluno)
 
 // generic alunos endpoint used in some frontend requests
 router.get('/api/alunos', auth, AlunoController.index)
+router.get('/api/alunos/:id', auth, AlunoController.show)
 
 export { router };

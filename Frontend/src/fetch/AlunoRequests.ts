@@ -120,27 +120,19 @@ class AlunoRequests {
     async obterAlunoPorId(id_aluno: string) {
         try {
             const token = this.getToken();
-            const endpoints = [
-                { url: `${this.serverURL}/api/adultos/${id_aluno}`, categoria: 'ADULTO' as const },
-                { url: `${this.serverURL}/api/kids/${id_aluno}`, categoria: 'KIDS' as const }
-            ];
-
-            for (const endpoint of endpoints) {
-                const respostaAPI = await fetch(endpoint.url, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                        'x-access-token': token
-                    }
-                });
-
-                if (respostaAPI.ok) {
-                    const aluno = await respostaAPI.json();
-                    return this.normalizarAluno(aluno, endpoint.categoria);
+            const respostaAPI = await fetch(`${this.serverURL}/api/alunos/${id_aluno}`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'x-access-token': token
                 }
-            }
+            });
 
-            throw new Error("Não foi possível buscar o aluno.");
+            if (!respostaAPI.ok) throw new Error("Não foi possível buscar o aluno.");
+
+            const aluno = await respostaAPI.json();
+            const categoria = 'responsavel' in aluno ? 'KIDS' : 'ADULTO';
+            return this.normalizarAluno(aluno, categoria);
         } catch (error) {
             console.error(`Erro ao fazer a consulta de aluno por ID. ${error}`);
             return;
