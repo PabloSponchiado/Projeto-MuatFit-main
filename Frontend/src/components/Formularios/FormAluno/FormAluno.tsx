@@ -52,6 +52,11 @@ export default function FormAluno(): JSX.Element {
     e.preventDefault();
     setErro('');
 
+    if (imagemPerfil && imagemPerfil.size > 5 * 1024 * 1024) {
+      setErro('A imagem deve ter no máximo 5 MB.');
+      return;
+    }
+
     if (dados.categoria === 'KIDS' && (!dados.telefoneResponsavel || !dados.telefoneResponsavel.trim())) {
       setErro('Para alunos da categoria Kids, o contato do responsável é obrigatório.');
       return;

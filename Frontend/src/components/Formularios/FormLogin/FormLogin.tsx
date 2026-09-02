@@ -22,6 +22,10 @@ export default function FormLogin({ initialMode = 'login' }: FormLoginProps): JS
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErro('');
+    if (imagemPerfil && imagemPerfil.size > 5 * 1024 * 1024) {
+      setErro('A imagem deve ter no máximo 5 MB.');
+      return;
+    }
     setCarregando(true);
     try {
       const sucesso = modoCadastro
