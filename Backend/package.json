@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "dev": "nodemon",
     "start": "node dist/app.js"
   },
   "keywords": [],

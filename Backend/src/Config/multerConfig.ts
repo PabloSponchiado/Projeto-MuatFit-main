@@ -1,12 +1,18 @@
 import multer from 'multer'; // Importa o Multer, responsável por lidar com uploads
 import path from 'path'; // Módulo para trabalhar com caminhos de arquivos
 import crypto from 'crypto'; // Módulo para gerar valores aleatórios
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+export const uploadsDirectory = path.resolve(__dirname, '..', '..', 'uploads');
+fs.mkdirSync(uploadsDirectory, { recursive: true });
 
 // Define a configuração de armazenamento dos arquivos
 const storage = multer.diskStorage({
   // Define o diretório onde os arquivos enviados serão salvos
   destination: (req, file, cb) => {
-    cb(null, path.resolve(__dirname, '..', '..', 'uploads')); // Caminho absoluto até a pasta "uploads"
+    cb(null, uploadsDirectory); // Caminho absoluto até a pasta "uploads"
   },
 
   // Define o nome do arquivo que será salvo

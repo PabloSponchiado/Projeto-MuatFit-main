@@ -1,11 +1,11 @@
 import express from "express";
 import cors from "cors";
 import { router } from "./routes.js";
-import path from 'path';
+import { uploadsDirectory } from './Config/multerConfig.js';
 
 const server = express();
 server.use(cors());
-server.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));  // Serve os arquivos da pasta uploads
+server.use('/uploads', express.static(uploadsDirectory));  // Serve os arquivos da pasta uploads
 server.use(express.json());
 server.use(router);
 // Error handler to log unexpected errors and return 500
