@@ -76,8 +76,14 @@ export default function FormAluno(): JSX.Element {
       return;
     }
 
-    if (!validarCPF(String(dados.cpf || ''))) {
-      setErro('CPF inválido. Informe um CPF com 11 dígitos.');
+    const cpfNumeros = onlyDigits(String(dados.cpf || ''));
+    if (cpfNumeros.length !== 11) {
+      setErro('CPF incompleto. Informe os 11 dígitos do CPF.');
+      return;
+    }
+
+    if (!validarCPF(cpfNumeros)) {
+      setErro('CPF inválido. Informe um CPF real com dígitos verificadores válidos.');
       return;
     }
 
