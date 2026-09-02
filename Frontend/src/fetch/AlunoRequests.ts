@@ -107,13 +107,16 @@ class AlunoRequests {
                 body: formulario
             });
 
-            if (!respostaAPI.ok) throw new Error(`Erro ${respostaAPI.status}: ${respostaAPI.statusText}`);
+            if (!respostaAPI.ok) {
+                const erro = await respostaAPI.json().catch(() => ({}));
+                throw new Error(erro.error ?? erro.message ?? `Erro ${respostaAPI.status}: ${respostaAPI.statusText}`);
+            }
 
             console.info(`${respostaAPI.status}: ${respostaAPI.statusText}`);
             return true;
         } catch (error) {
             console.error(`Erro ao fazer consulta à API. ${error}`);
-            return false;
+            throw error;
         }
     }
 

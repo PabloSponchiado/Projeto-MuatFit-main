@@ -27,6 +27,9 @@ const AdultoController = {
       return res.status(201).json(adulto)
     } catch (error: any) {
       console.error('AdultoController.create error:', error)
+      if (error?.code === '23505') {
+        return res.status(409).json({ error: 'Já existe um aluno com este CPF.' })
+      }
       return res.status(500).json({ error: 'Erro interno ao criar adulto', message: error?.message ?? String(error) })
     }
   },

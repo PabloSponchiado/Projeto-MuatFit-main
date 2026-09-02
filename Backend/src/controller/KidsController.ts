@@ -27,6 +27,9 @@ const KidsController = {
       return res.status(201).json(kid)
     } catch (error: any) {
       console.error('KidsController.create error:', error)
+      if (error?.code === '23505') {
+        return res.status(409).json({ error: 'Já existe um aluno com este CPF.' })
+      }
       return res.status(500).json({ error: 'Erro interno ao criar kid', message: error?.message ?? String(error) })
     }
   },
