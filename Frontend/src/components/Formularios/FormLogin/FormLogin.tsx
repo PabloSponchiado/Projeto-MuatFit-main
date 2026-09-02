@@ -14,6 +14,7 @@ export default function FormLogin({ initialMode = 'login' }: FormLoginProps): JS
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [academia, setAcademia] = useState('Minha Academia');
+  const [imagemPerfil, setImagemPerfil] = useState<File | undefined>();
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
@@ -24,7 +25,7 @@ export default function FormLogin({ initialMode = 'login' }: FormLoginProps): JS
     setCarregando(true);
     try {
       const sucesso = modoCadastro
-        ? await AuthRequests.register({ nome, email, senha, academia })
+        ? await AuthRequests.register({ nome, email, senha, academia, imagemPerfil })
         : await AuthRequests.login({ email, senha });
 
       if (!sucesso) {
@@ -91,6 +92,15 @@ export default function FormLogin({ initialMode = 'login' }: FormLoginProps): JS
                   className="w-full px-4 py-2.5 rounded-lg bg-input-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
                   placeholder="Seu nome"
                 />
+              </div>
+            )}
+
+            {modoCadastro && (
+              <div>
+                <label className="block text-foreground mb-2" style={{ fontSize: '0.875rem', fontWeight: 500 }}>
+                  Foto de perfil
+                </label>
+                <input type="file" accept="image/*" onChange={e => setImagemPerfil(e.target.files?.[0])} className="w-full text-sm text-muted-foreground" />
               </div>
             )}
 

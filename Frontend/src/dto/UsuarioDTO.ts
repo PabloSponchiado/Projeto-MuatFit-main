@@ -4,6 +4,7 @@ export interface UsuarioDTO {
   email: string;
   role: 'ADMIN' | 'PROFESSOR';
   academia: string;
+  imagemPerfil?: string;
 }
 
 export interface LoginDTO {
