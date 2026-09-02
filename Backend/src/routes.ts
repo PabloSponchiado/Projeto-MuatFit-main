@@ -21,18 +21,21 @@ router.get('/', (req: Request, res: Response) => {
 });
 // Auth
 router.post('/api/login', AuthController.login)
-router.post('/api/register', AuthController.register)
+router.post('/api/register', upload.single('imagemPerfil'), AuthController.register)
+router.patch('/api/usuarios/perfil', auth, upload.single('imagemPerfil'), AuthController.updateProfile)
 router.post(SERVER_ROUTES.NOVO_USUARIO, upload.single('imagemPerfil'), UsuarioController.cadastrar)
 
 // Alunos (frontend usa endpoints separados para adultos e kids)
 router.get('/api/adultos', auth, AdultoController.index)
 router.get('/api/adultos/:id', auth, AdultoController.show)
-router.post('/api/adultos', auth, AdultoController.create)
+router.post('/api/adultos', auth, upload.single('imagemPerfil'), AdultoController.create)
+router.patch('/api/adultos/:id', auth, upload.single('imagemPerfil'), AdultoController.update)
 router.delete('/api/adultos/:id', auth, AdultoController.delete)
 
 router.get('/api/kids', auth, KidsController.index)
 router.get('/api/kids/:id', auth, KidsController.show)
-router.post('/api/kids', auth, KidsController.create)
+router.post('/api/kids', auth, upload.single('imagemPerfil'), KidsController.create)
+router.patch('/api/kids/:id', auth, upload.single('imagemPerfil'), KidsController.update)
 router.delete('/api/kids/:id', auth, KidsController.delete)
 
 // Graduacoes

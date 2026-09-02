@@ -24,6 +24,7 @@ export interface AdultoBaseDTO {
   ativo: boolean;
   graduacaoAtual: GraduacaoAdultoNivel;
   observacoes?: string;
+  imagemPerfil?: string;
   categoria: 'ADULTO' | 'KIDS';
 }
 
@@ -38,4 +39,5 @@ export interface AdultoCreateDTO {
   endereco: string;
   graduacaoAtual: GraduacaoAdultoNivel;
   observacoes?: string;
+  imagemPerfil?: string;
 }

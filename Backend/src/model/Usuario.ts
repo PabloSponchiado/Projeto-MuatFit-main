@@ -236,4 +236,22 @@ export class Usuario {
         // Executa a query passando o nome do arquivo e o uuid do usuário como parâmetros
         await database.query(query, [nomeArquivo, uuid]);
     }
+
+    static async atualizarPerfil(
+        idUsuario: number,
+        dados: { nome?: string | undefined; email?: string | undefined; academia?: string | undefined; senha?: string | undefined; imagemPerfil?: string | undefined }
+    ): Promise<Record<string, unknown> | null> {
+        const resultado = await database.query(
+            `UPDATE usuario SET
+                nome = COALESCE($1, nome),
+                email = COALESCE($2, email),
+                academia = COALESCE($3, academia),
+                senha = COALESCE(NULLIF($4, ''), senha),
+                imagem_perfil = COALESCE($5, imagem_perfil)
+             WHERE id_usuario = $6
+             RETURNING id_usuario, nome, email, role, academia, imagem_perfil`,
+            [dados.nome ?? null, dados.email ?? null, dados.academia ?? null, dados.senha ?? '', dados.imagemPerfil ?? null, idUsuario]
+        );
+        return resultado.rows[0] ?? null;
+    }
 }

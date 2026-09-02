@@ -17,6 +17,7 @@ class Adulto {
 			ativo: Boolean(adulto.ativo),
 			graduacaoAtual: adulto.graduacao_atual as AdultoDTO["graduacaoAtual"],
 			observacoes: String(adulto.observacoes ?? ""),
+			imagemPerfil: String(adulto.imagem_perfil ?? ""),
 			categoria: "ADULTO"
 		};
 	}
@@ -37,11 +38,11 @@ class Adulto {
 		return resultado.rows.length > 0 ? Adulto.toDTO(resultado.rows[0]) : null;
 	}
 
-	static async cadastrarAdulto(dados: AdultoCreateDTO, usuarioId: number): Promise<AdultoDTO> {
+	static async cadastrarAdulto(dados: AdultoCreateDTO & { imagemPerfil?: string }, usuarioId: number): Promise<AdultoDTO> {
 		const resultado = await database.query(
 			`INSERT INTO adultos
-				(nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, observacoes, usuario_id)
-			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+				(nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, observacoes, imagem_perfil, usuario_id)
+			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
 			[
 				dados.nome,
 				dados.cpf,
@@ -51,6 +52,7 @@ class Adulto {
 				dados.endereco,
 				dados.graduacaoAtual,
 				dados.observacoes ?? "",
+				dados.imagemPerfil ?? null,
 				usuarioId
 			]
 		);
@@ -63,6 +65,17 @@ class Adulto {
 			[id, usuarioId]
 		);
 		return (resultado.rowCount ?? 0) > 0;
+	}
+
+	static async atualizarAdulto(id: string, dados: Partial<AdultoCreateDTO>, usuarioId: number, imagemPerfil?: string): Promise<AdultoDTO | null> {
+		const resultado = await database.query(
+			`UPDATE adultos SET nome=COALESCE($1, nome), cpf=COALESCE($2, cpf), data_nascimento=COALESCE($3, data_nascimento), email=COALESCE($4, email), telefone=COALESCE($5, telefone),
+			 endereco=COALESCE($6, endereco), graduacao_atual=COALESCE($7, graduacao_atual), observacoes=COALESCE($8, observacoes), imagem_perfil=COALESCE($9, imagem_perfil)
+			 WHERE id=$10 AND usuario_id=$11 RETURNING *`,
+			[dados.nome, dados.cpf, dados.dataNascimento, dados.email, dados.telefone, dados.endereco,
+			 dados.graduacaoAtual, dados.observacoes ?? '', imagemPerfil ?? null, id, usuarioId]
+		);
+		return resultado.rows.length ? Adulto.toDTO(resultado.rows[0]) : null;
 	}
 }
 

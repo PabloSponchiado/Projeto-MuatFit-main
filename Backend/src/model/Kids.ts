@@ -19,6 +19,7 @@ class Kids {
 			responsavel: String(kid.responsavel ?? ""),
 			telefoneResponsavel: String(kid.telefone_responsavel ?? ""),
 			observacoes: String(kid.observacoes ?? ""),
+			imagemPerfil: String(kid.imagem_perfil ?? ""),
 			categoria: "KIDS"
 		};
 	}
@@ -39,11 +40,11 @@ class Kids {
 		return resultado.rows.length > 0 ? Kids.toDTO(resultado.rows[0]) : null;
 	}
 
-	static async cadastrarKid(dados: KidsCreateDTO, usuarioId: number): Promise<KidsDTO> {
+	static async cadastrarKid(dados: KidsCreateDTO & { imagemPerfil?: string }, usuarioId: number): Promise<KidsDTO> {
 		const resultado = await database.query(
 			`INSERT INTO kids
-				(nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, responsavel, telefone_responsavel, observacoes, usuario_id)
-			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+				(nome, cpf, data_nascimento, email, telefone, endereco, graduacao_atual, responsavel, telefone_responsavel, observacoes, imagem_perfil, usuario_id)
+			 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
 			[
 				dados.nome,
 				dados.cpf,
@@ -55,6 +56,7 @@ class Kids {
 				dados.responsavel,
 				dados.telefoneResponsavel,
 				dados.observacoes,
+				dados.imagemPerfil ?? null,
 				usuarioId
 			]
 		);
@@ -67,6 +69,19 @@ class Kids {
 			[id, usuarioId]
 		);
 		return (resultado.rowCount ?? 0) > 0;
+	}
+
+	static async atualizarKid(id: string, dados: Partial<KidsCreateDTO>, usuarioId: number, imagemPerfil?: string): Promise<KidsDTO | null> {
+		const resultado = await database.query(
+			`UPDATE kids SET nome=COALESCE($1, nome), cpf=COALESCE($2, cpf), data_nascimento=COALESCE($3, data_nascimento), email=COALESCE($4, email), telefone=COALESCE($5, telefone),
+			 endereco=COALESCE($6, endereco), graduacao_atual=COALESCE($7, graduacao_atual), responsavel=COALESCE($8, responsavel), telefone_responsavel=COALESCE($9, telefone_responsavel),
+			 observacoes=COALESCE($10, observacoes), imagem_perfil=COALESCE($11, imagem_perfil)
+			 WHERE id=$12 AND usuario_id=$13 RETURNING *`,
+			[dados.nome, dados.cpf, dados.dataNascimento, dados.email, dados.telefone, dados.endereco,
+			 dados.graduacaoAtual, dados.responsavel, dados.telefoneResponsavel, dados.observacoes ?? '',
+			 imagemPerfil ?? null, id, usuarioId]
+		);
+		return resultado.rows.length ? Kids.toDTO(resultado.rows[0]) : null;
 	}
 }
 
