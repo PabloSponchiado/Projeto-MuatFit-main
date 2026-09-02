@@ -12,10 +12,16 @@ export const formatarTelefone = (tel: string): string => {
   return nums.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
 };
 
-export const formatarData = (data: string): string => {
+export const formatarData = (data: string | Date): string => {
   if (!data) return '';
-  const [ano, mes, dia] = data.split('-');
-  return `${dia}/${mes}/${ano}`;
+
+  const valor = data instanceof Date ? data.toISOString() : String(data);
+  const dataISO = valor.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (dataISO) return `${dataISO[3]}/${dataISO[2]}/${dataISO[1]}`;
+
+  const dataConvertida = new Date(valor);
+  if (Number.isNaN(dataConvertida.getTime())) return '';
+  return dataConvertida.toLocaleDateString('pt-BR');
 };
 
 export const formatarMoeda = (valor: number): string => {

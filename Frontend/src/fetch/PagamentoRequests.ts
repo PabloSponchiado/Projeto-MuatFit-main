@@ -21,6 +21,9 @@ class PagamentoRequests {
     private normalizarPagamento(pagamento: any): PagamentoDTO {
         const dataVencimento = pagamento.dataVencimento ?? pagamento.data_vencimento ?? '';
         const dataPagamento = pagamento.dataPagamento ?? pagamento.data_pagamento ?? undefined;
+        const dataBase = String(dataVencimento).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        const mes = pagamento.mes ?? (dataBase ? ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'][Number(dataBase[2]) - 1] : '');
+        const ano = Number(pagamento.ano ?? dataBase?.[1] ?? new Date().getFullYear());
         const status = pagamento.status ?? (
             dataPagamento ? 'PAGO' : new Date(dataVencimento) < new Date() ? 'VENCIDO' : 'PENDENTE'
         );
@@ -33,8 +36,8 @@ class PagamentoRequests {
             dataVencimento,
             dataPagamento: dataPagamento ?? undefined,
             status,
-            mes: pagamento.mes ?? '',
-            ano: Number(pagamento.ano ?? new Date().getFullYear()),
+            mes,
+            ano,
             observacao: pagamento.observacao ?? ''
         };
     }
