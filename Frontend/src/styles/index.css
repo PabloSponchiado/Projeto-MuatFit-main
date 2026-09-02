@@ -1,3 +1,32 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+@media (max-width: 767px) {
+	.p-6 {
+		padding: 1rem;
+	}
+
+	.grid.grid-cols-4 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	table {
+		display: block;
+		width: 100%;
+		overflow-x: auto;
+	}
+
+	table th,
+	table td {
+		white-space: nowrap;
+	}
+}
+
+@media (max-width: 480px) {
+	.grid.grid-cols-2,
+	.grid.grid-cols-3,
+	.grid.grid-cols-4 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
