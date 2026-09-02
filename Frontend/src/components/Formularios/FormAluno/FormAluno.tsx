@@ -20,12 +20,14 @@ type FormAlunoState = {
   observacoes: string;
   responsavel?: string;
   telefoneResponsavel?: string;
+  imagemPerfil?: File;
 };
 
 export default function FormAluno(): JSX.Element {
   const navigate = useNavigate();
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
+  const [imagemPerfil, setImagemPerfil] = useState<File | undefined>();
   const [dados, setDados] = useState<FormAlunoState>({
     nome: '', cpf: '', dataNascimento: '', categoria: 'ADULTO',
     email: '', telefone: '', endereco: '', graduacaoAtual: getGraduacoesPorCategoria('ADULTO')[0], observacoes: '',
@@ -99,7 +101,7 @@ export default function FormAluno(): JSX.Element {
 
     setCarregando(true);
     try {
-      await AlunoRequests.enviarFormularioAluno(dados);
+      await AlunoRequests.enviarFormularioAluno({ ...dados, imagemPerfil });
       navigate('/alunos');
     } catch (err) {
       setErro(err instanceof Error ? err.message : 'Erro ao cadastrar aluno');
@@ -138,6 +140,10 @@ export default function FormAluno(): JSX.Element {
             <div>
               <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>CPF *</label>
               <input className={fieldClass} value={dados.cpf} onChange={e => handleCpfChange(e.target.value)} required placeholder="000.000.000-00" />
+            </div>
+            <div className="md:col-span-2">
+              <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Foto do aluno</label>
+              <input type="file" accept="image/*" onChange={e => setImagemPerfil(e.target.files?.[0])} className="w-full text-sm text-muted-foreground" />
             </div>
             <div>
               <label className={labelClass} style={{ fontSize: '0.875rem', fontWeight: 500 }}>Data de Nascimento *</label>
